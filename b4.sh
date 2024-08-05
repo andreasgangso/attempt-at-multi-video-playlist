@@ -8,12 +8,6 @@ output_dir="hls_output"
 temp_dir="hls_output/temp"
 mkdir -p $output_dir
 
-# Master playlist file
-master_playlist="$output_dir/master_playlist.m3u8"
-
-# Start the master playlist file
-echo "#EXTM3U" > $master_playlist
-
 # Process each input file
 for lang in "${!inputs[@]}"; do
     input=${inputs[$lang]}
@@ -24,6 +18,10 @@ for lang in "${!inputs[@]}"; do
     temp_video_stream_dir="$temp_dir/$lang/video"
     temp_audio_stream_dir="$temp_dir/$lang/audio"
     mkdir -p $output_dir/$lang $temp_video_stream_dir $temp_audio_stream_dir $video_stream_dir $audio_stream_dir
+
+    # Master playlist file
+    master_playlist="$output_dir/master_$lang.m3u8"
+    echo "#EXTM3U" > $master_playlist
 
     # Extract audio/video
     ffmpeg -i $input -an -vcodec copy $temp_video_stream_dir/video_$lang.mp4
@@ -44,7 +42,5 @@ for lang in "${!inputs[@]}"; do
     echo "$lang/video/stream.m3u8" >> $master_playlist
 done
 
-# Set the master playlist name
-mv $master_playlist "$output_dir/master_playlist.m3u8"
 
 echo "HLS packaging complete. Master playlist located at $output_dir/master_playlist.m3u8"
